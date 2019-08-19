@@ -4,13 +4,13 @@
 	Idea: 
 		- Assuming that we have an array of n numbers each of which equals init,
 		where init >= n - 1, the number of times we need to operate on this array,
-		 for all the elements become <= n - 1, is (init - (n - 1) * n.
+		 for all the elements become <= n - 1, is (init - (n - 1)) * n.
 
 		- So, we can fix n = 50 and choose such an init depending no k for which
 		(init - (n - 1)) = ceil(k / n).
 
 		- Now, if we let the array be n inits, the number of operations needed:
-		need = (init - (n - 1) * n. Then, need - k < n = 50. So, if simulate the
+		need = (init - (n - 1)) * n. Then, need - k < n = 50. So, if simulate the
 		operation (need - k) times on this array, we'll get a valid array for the
 		answer.
 */
