@@ -1,0 +1,148 @@
+/*
+	Author: Nayeemul Islam Swad
+	
+	Idea: 
+		- At each y-coordinate Y, we'll traverse through the segments (x1, x2)
+		that has Y as their y-coordinate and store the two answers we get if we
+		drop balls from (x1, y) and (x2, y).
+		  
+		- To do that, we'll go in increasing order of Y. Suppose we've solved
+		for all y < Y and (x1, x2) is a segment in Y. So we need the answers
+		for (x1, Y) and (x2, Y). Getting answers for either of them follows the
+		same procedure, so let's assume we're trying to find the answer for
+		(x1, Y).
+		
+		- First, we have to find on which y-coordinate the ball will land for the
+		first time when dropped from (x1, Y). We can do that by maintaining the
+		highest y-coordinate for each x-coordinate in a lazy segment tree and
+		querying for x1 in that tree. Let the answer of that query be y1. So, the
+		ball is going to land at height y1 next, and since we're processing Y we
+		must've already processed y1 earlier.
+		
+		- So, we can just find the segment in y1 that lies right beneath x1, and
+		then find on which end of that segment the ball will go next. Then we can
+		use our preprocessed answers for segments of y1 to get the required answer
+		for (x1, Y).
+
+		- Now, follwing this same procedure we can answer the queries for any x by
+		finding the answer for (x, Y) where Y is the maximum y-coordinate among all
+		the segments.
+*/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define debug(a) cerr << #a << ": " << a << endl
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+#define x first
+#define y second
+
+const int N = 1e5 + 10;
+
+int n, m;
+vector<pair<int, pii>> seg;
+vector<int> x[N], ans[N];
+
+int st[4 * N], lazy[4 * N];
+void update(int stI, int L, int R, int l, int r, int val) {
+	if (r < L || R < l) return;
+
+	if (l <= L && R <= r) {
+		lazy[stI] = val;
+		return;
+	}
+
+	if (lazy[stI] != 0) {
+		lazy[(stI << 1)] = lazy[stI];
+		lazy[(stI << 1) + 1] = lazy[stI];
+		lazy[stI] = 0;
+	}
+
+	int mid = (L + R) / 2;
+	update((stI << 1), L, mid, l, r, val);
+	update((stI << 1) + 1, mid + 1, R, l, r, val);
+
+	int l_stI = (stI << 1);
+	int r_stI = (stI << 1) + 1;
+
+	int l_ans = lazy[l_stI] == 0 ? st[l_stI] : lazy[l_stI];
+	int r_ans = lazy[r_stI] == 0 ? st[r_stI] : lazy[r_stI];
+
+	st[stI] = max(l_ans, r_ans);
+}
+void update(int l, int r, int val) {
+	update(1, 1, N, l, r, val);
+}
+int query(int stI, int L, int R, int at) {
+	if (at < L || R < at) return 0;
+
+	if (lazy[stI] != 0) return lazy[stI];
+	if (L == R) return st[stI];
+
+	int mid = (L + R) / 2;
+	int q1 = query((stI << 1), L, mid, at);
+	int q2 = query((stI << 1) + 1, mid + 1, R, at);
+
+	return max(q1, q2);
+}
+int query(int at) {
+	return query(1, 1, N, at);
+}
+
+int getAns(int at) {
+	int h = query(at);
+	if (h == 0) return at;
+
+	int r = lower_bound(x[h].begin(), x[h].end(), at) - x[h].begin();
+	if (r % 2 == 0) r++;
+	assert(r < x[h].size());
+	int l = r - 1;
+
+	if (at <= (x[h][l] + x[h][r]) / 2) return ans[h][l];
+	return ans[h][r];
+}
+
+int main() {
+	#ifdef LOCAL
+	freopen("in", "r", stdin);
+	freopen("out", "w", stdout);
+	#endif
+
+	cin >> n >> m;
+	seg.reserve(n);
+
+	for (int i = 0; i < n; i++) {
+		int x1, x2, y;
+		scanf("%d %d %d", &x1, &x2, &y);
+		seg.push_back({y, {x1, x2}});
+	}
+
+	sort(seg.begin(), seg.end());
+	seg.resize(unique(seg.begin(), seg.end()) - seg.begin());
+
+	for (int i = 0; i < seg.size(); i++) {
+		int l = seg[i].y.x;
+		int r = seg[i].y.y;
+		int h = seg[i].x;
+
+		x[h].push_back(l);
+		ans[h].push_back(getAns(l));
+
+		x[h].push_back(r);
+		ans[h].push_back(getAns(r));
+
+		update(l, r, h);
+	}
+
+	for (int i = 0; i < m; i++) {
+		int at;
+		scanf("%d", &at);
+		printf("%d\n", getAns(at));
+	}
+
+	return 0;
+}
