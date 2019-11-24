@@ -1,3 +1,25 @@
+/*
+	Author: Nayeemul Islam Swad
+
+	Idea:
+		- If we start going up or down from `(0, 0)`, the sequence of cells will
+		  be periodic. `(goalX, goalY)` must be one of the cells in this sequence.
+		  Then, we can restate the problem as follows,
+		    Given an array of length `n` and our current position `pos`. If our
+		    current position is `i` then in a single move we can either go to
+		    `i - 1` or `i + 1`. Evaluate `E(pos)` which is the expected number
+		    moves before reaching either `0` or `n + 1`.
+
+		- We can find `E(i)`, `1 <= i <= n` by solving the system:
+		    E(0) = E(n + 1) = 0
+		    E(i) = 0.5 * E(i - 1) + 0.5 * E(i + 1) + 1
+		  using the definition of the moves.
+
+		- We can solve this system either by Gaussian Elimination method or any
+		  other similar algorithms. The code below uses Tridiagonal Matrix
+		  Algorithm.
+*/
+
 #include <bits/stdc++.h>
 
 using namespace std;
