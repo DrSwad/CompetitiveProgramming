@@ -1,0 +1,141 @@
+/*
+	Author: Nayeemul Islam Swad
+
+	Idea:
+		- Since for each segment water can fall to only one other segment, and
+		  water will keep going only downwards, we can form a DAG by considering
+		  each segment as a node and putting an edge from each segment to the
+		  one that gains it's water.
+
+		- We first compress the x-coordinates of the endpoints of all segments.
+		  We then do a line sweep over these coordinates, maintaining a vector
+		  of segment IDs that intersect with the vertical line, sorted by their
+		  intersection point height. We evaluate two values for each segment
+		  through the line sweep:
+		   	1. The amount of water that this segment gains directly from the sky.
+		   	2. ID of the segment that this segment's water goes to.
+
+		- Finally we do a topological sort on the DAG.
+*/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef unsigned int uint;
+typedef pair<int, int> pii;
+#define x first
+#define y second
+
+#ifdef LOCAL
+#include "debug.h"
+#endif
+
+const int N = int(4e4) + 10;
+const int M = int(1e6) + 10;
+
+int n;
+pii pL[N], pR[N];
+int holds[N];
+vector<int> dropX[M];
+int downSeg[N];
+
+// returns true if the i'th segment has lower extrapolation than j'th segment at atX
+bool cmp(int i, int j, int atX) {
+	// long double yi = (long double)pL[i].y + (long double)(pR[i].y - pL[i].y) / (long double)(pR[i].x - pL[i].x) * (long double)(atX - pL[i].x);
+	// long double yj = (long double)pL[j].y + (long double)(pR[j].y - pL[j].y) / (long double)(pR[j].x - pL[j].x) * (long double)(atX - pL[j].x);
+	// return yi < yj;
+	return 1LL * pL[i].y * (pR[j].x - pL[j].x) * (pR[i].x - pL[i].x) + 1LL * (pR[i].y - pL[i].y) * (atX - pL[i].x) * (pR[j].x - pL[j].x) < 1LL * pL[j].y * (pR[i].x - pL[i].x) * (pR[j].x - pL[j].x) + 1LL * (pR[j].y - pL[j].y) * (atX - pL[j].x) * (pR[i].x - pL[i].x);
+}
+
+int main() {
+	#ifdef LOCAL
+	freopen("in", "r", stdin);
+	freopen("out", "w", stdout);
+	#endif
+
+	int t;
+	cin >> t;
+
+	while (t--) {
+		scanf("%d", &n);
+		pL[0] = {0, -1};
+		pR[0] = {M, -1};
+
+		for (int i = 1; i <= n; i++) {
+			scanf("%d %d", &pL[i].x, &pL[i].y);
+			scanf("%d %d", &pR[i].x, &pR[i].y);
+			dropX[pL[i].y < pR[i].y ? pL[i].x : pR[i].x].push_back(i);
+		}
+
+		// Compress the x coordinates and traverse through them
+		vector<pii> comp(2 * n);
+		for (int i = 1; i <= n; i++) {
+			comp[2 * i - 1] = {pL[i].x, i};
+			comp[2 * i - 2] = {pR[i].x, i};
+		}
+		sort(comp.begin(), comp.end());
+		comp.resize(unique(comp.begin(), comp.end()) - comp.begin());
+
+
+		// Traverse the x-coordinates and store the current segments in segs
+		// vector sorted by their y-coordinates
+		vector<int> segs{0};
+		for (int i = 0; i < comp.size(); ) {
+			int atX = comp[i].x;
+			int nxt = i;
+			// Insert all segments that has an endpoint here
+			while (nxt < comp.size() && comp[nxt].x == atX) {
+				if (pL[comp[nxt].y].x == atX) {
+					int insert_at = 0;
+					while (insert_at < segs.size() && cmp(segs[insert_at], comp[nxt].y, atX)) insert_at++;
+					segs.insert(segs.begin() + insert_at, comp[nxt].y);
+				}
+				nxt++;
+			}
+
+			// For every segment that drops water here, find the segment
+			// that it drops to
+			for (int j : dropX[atX]) {
+				int ind = find(segs.begin(), segs.end(), j) - segs.begin();
+				downSeg[j] = segs[ind -  1];
+			}
+
+			// Remove all the segments that end here
+			for (int j = i; j < nxt; j++) {
+				int ind = comp[j].y;
+				if (pR[ind].x == atX) {
+					segs.erase(find(segs.begin(), segs.end(), ind));
+				}
+			}
+
+			// Pour all the water from the sky in between current x-coordinate
+			// and the next one to the segment that is the current highest
+			if (nxt < comp.size()) holds[segs.back()] += comp[nxt].x - comp[i].x;
+
+			i = nxt;
+		}
+
+		// Finally do a topological sort
+		vector<int> indeg(n + 1, 0);
+		for (int i = 1; i <= n; i++) indeg[downSeg[i]]++;
+		queue<int> q;
+		for (int i = 1; i <= n; i++) if (indeg[i] == 0) q.push(i);
+		while (!q.empty()) {
+			int at = q.front(), down = downSeg[at];
+			holds[down] += holds[at];
+			indeg[down]--;
+			if (indeg[down] == 0 && down != 0) q.push(down);
+			q.pop();
+		}
+
+		for (int i = 1; i <= n; i++) printf("%d\n", holds[i]);
+
+		// reset everything
+		fill(holds, holds + n + 1, 0);
+		for (pii p : comp) dropX[p.x].clear();
+	}
+
+	return 0;
+}
