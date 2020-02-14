@@ -20,6 +20,10 @@
 		- At some point during this process, we'll find a start position pos for
 		  which nxt[pos] > r. Then we can find our finishing position in the trie
 		  by using hash on the substring s[pos, r].
+
+		- The hashes in this problem require two mods. One isn't enought due to
+		  the large amount of strings and substrings getting hashed and three
+		  mods doesn't fit into the time constraint.
 */
 
 #include <bits/stdc++.h>
