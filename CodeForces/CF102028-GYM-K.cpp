@@ -22,8 +22,7 @@
 		  by using hash on the substring s[pos, r].
 
 		- The hashes in this problem require two mods. One isn't enought due to
-		  the large amount of strings and substrings getting hashed and three
-		  mods doesn't fit into the time constraint.
+		  the large amount of strings and substrings getting hashed.
 */
 
 #include <bits/stdc++.h>
@@ -64,16 +63,15 @@ int main() {
 		iota(char_codes, char_codes + 26, 1);
 		shuffle(char_codes, char_codes + 26, rng);
 
-		vector<int> hash[n + 1]; hash[0] = vector<int>(TOT_MODS, 0);
-		map<vector<int>, int> hash_at; hash_at[hash[0]] = 0;
+		ll hash[n + 1]; hash[0] = 0;
+		unordered_map<ll, int> hash_at; hash_at[hash[0]] = 0;
 		for (int i = 1; i <= n; i++) {
 			int par;
 			char ch;
 			scanf("%d %c", &par, &ch);
-			hash[i] = vector<int>(TOT_MODS);
-			for (int j = 0; j < TOT_MODS; j++) {
-				hash[i][j] = (hash[par][j] * 1LL * BASES[j] + char_codes[ch - 'a']) % MODS[j];
-			}
+			ll rem1 = ((hash[par] >> 31) * 1LL * BASES[0] + char_codes[ch - 'a']) % MODS[0];
+			ll rem2 = ((hash[par] & INT_MAX) * 1LL * BASES[1] + char_codes[ch - 'a']) % MODS[1];
+			hash[i] = (rem1 << 31) | rem2;
 			// assert(hash_at.find(hash[i]) == hash_at.end());
 			hash_at[hash[i]] = i;
 		}
@@ -102,11 +100,14 @@ int main() {
 			int L = 0, R = m - i + 1;
 			while (L != R) {
 				int mid = (L + R + 1) / 2;
-				vector<int> sub_hash(TOT_MODS);
-				for  (int j = 0; j < TOT_MODS; j++) {
-					sub_hash[j] = pref_hash[i + mid - 1][j] - pref_hash[i - 1][j] * 1LL * pow_mod[mid][j] % MODS[j];
-					if (sub_hash[j] < 0) sub_hash[j] += MODS[j];
-				}
+
+				ll sub_hash;
+				ll rem1 = pref_hash[i + mid - 1][0] - pref_hash[i - 1][0] * 1LL * pow_mod[mid][0] % MODS[0];
+				if (rem1 < 0) rem1 += MODS[0];
+				ll rem2 = pref_hash[i + mid - 1][1] - pref_hash[i - 1][1] * 1LL * pow_mod[mid][1] % MODS[1];
+				if (rem2 < 0) rem2 += MODS[1];
+				sub_hash = (rem1 << 31) | rem2;
+
 				if (hash_at.find(sub_hash) != hash_at.end()) L = mid;
 				else R = mid - 1;
 			}
@@ -131,8 +132,7 @@ int main() {
 			int at = l;
 
 			while (nxt[at] <= r) {
-				int len = 0;
-				while (nxt_jump[at][len + 1] <= r) len++;
+				int len = upper_bound(nxt_jump[at], nxt_jump[at] + logm, r) - nxt_jump[at] - 1;
 
 				fail_cnt += (1 << len);
 				at = nxt_jump[at][len];
@@ -146,11 +146,14 @@ int main() {
 			}
 			else {
 				int len = r - at + 1;
-				vector<int> sub_hash(TOT_MODS);
-				for  (int j = 0; j < TOT_MODS; j++) {
-					sub_hash[j] = pref_hash[at + len - 1][j] - pref_hash[at - 1][j] * 1LL * pow_mod[len][j] % MODS[j];
-					if (sub_hash[j] < 0) sub_hash[j] += MODS[j];
-				}
+
+				ll sub_hash;
+				ll rem1 = pref_hash[at + len - 1][0] - pref_hash[at - 1][0] * 1LL * pow_mod[len][0] % MODS[0];
+				if (rem1 < 0) rem1 += MODS[0];
+				ll rem2 = pref_hash[at + len - 1][1] - pref_hash[at - 1][1] * 1LL * pow_mod[len][1] % MODS[1];
+				if (rem2 < 0) rem2 += MODS[1];
+				sub_hash = (rem1 << 31) | rem2;
+
 				final_pos = hash_at[sub_hash];
 			}
 
