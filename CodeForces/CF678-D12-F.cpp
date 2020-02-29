@@ -1,3 +1,22 @@
+/*
+	Author: Nayeemul Islam Swad
+
+	Idea:
+		- We'll solve this problem offline. We'll use the technique used for
+		  dynamic connectivity problems in graph thoery: Build a segment tree
+		  over the queries and add each line to the range in the segment tree
+		  where it exists.
+
+		- Then for each node in the segment tree, we sort the lines it has
+		  wrt their slopes and then build a CHT for that node.
+
+		- Now, we answer the queries in the order they appread in the input.
+		  Suppose we're answering `q` that appeard at `at` in the input order.
+		  Then we start at the root of the segment tree and go deeper until we
+		  reach `at`, and each time we update our answer by querying the CHT
+		  at our current node.
+*/
+
 #include <bits/stdc++.h>
 
 using namespace std;
