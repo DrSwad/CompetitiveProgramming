@@ -1,6 +1,6 @@
 /*
 	Author: Nayeemul Islam Swad
-	
+
 	Idea: 
 		- Represent the board as a bipartite graph whose left component
 		  has a node for every row and right one has a node for every
