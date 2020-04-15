@@ -1,8 +1,28 @@
 /*
 	Author: Nayeemul Islam Swad
-	
+
 	Idea: 
-		- 
+		- Let S = floor(sqrt(1)) + floor(sqrt(1)) + ... + floor(sqrt(n))
+
+		  Notice that, for a fixed integer x, if floor(sqrt(y)) = x then
+		  x ^ 2 <= y < (x + 1) ^ 2. So, if f(x) is the number of times x
+		  appears into the sum S, f(x) is simply equal to the number of
+		  odd numbers in the range [x^2, (x + 1)^2). This can be easily
+		  computed, 
+		    f(x) = x, if x is even
+		    f(x) = x + 1, otherwise
+
+		- So, the contibution of x to the sum is f(x) * x, for all
+		  x < floor(sqrt(n)). Let, y = floor(sqrt(n)) - 1.
+		    1 * f(1) + 2 * f(2) + ... + y * f(y)
+		  = [sum of (i * i + (1 if i is odd, 0 otherwise))]
+		  = [sum of (i * i)] + number of odd i
+		  = y * (y + 1) * (2 * y + 1) / 6 + (y + 1) / 2
+		  Since y is really big, we need to be careful while computing
+		  this multiplication to avoid overflow.
+
+		  Finally, compute f(y + 1) separately and add (y + 1) * f(y + 1)
+		  to the sum found before.
 */
 
 #include <bits/stdc++.h>
