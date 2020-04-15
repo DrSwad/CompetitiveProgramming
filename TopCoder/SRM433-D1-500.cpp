@@ -2,7 +2,32 @@
 	Author: Nayeemul Islam Swad
 	
 	Idea: 
-		- 
+		- Let p0 be the left-most point of the rhombus, if there're two
+		  such points then p0 is the bottom one.
+		  
+		  Consider the vertical line from p0. The three other points of
+		  the rhombus must form three different counter-clockwise angles
+		  with this line.
+
+		  Let p1 be the point with the highest angle of
+		  them, p2 be the point with lowest angle, and p3 the remaining
+		  point.
+
+		- Let dx_i = pi.x - p0.x, dy_i = pi.y - p0.y. We loop over all
+		  the possible values of 1 <= dx_1, dy_1, dx_2, dy_2, dx_3, dy_3 <= 100
+		  and see if they form a valid combination.
+
+		  If they do form a valid combination, then we find the number of
+		  possible locations for p0 and increase our answer by that number
+		  (Since fixing a combination of those six differences and p0 would
+		  also fix p1, p2, p3).
+
+		  The possible locations of p0 for a fixed combination can be found
+		  by realizing that the possible locations actually form a rectangle,
+		  so that for the any p0 in this rectangle, all the four points of
+		  the rhombus lie inside the given N x M square. So, we just
+		  calculate this rectangle and increase the answer by the number of
+		  points in this rectangle.
 */
 
 #include <bits/stdc++.h>
