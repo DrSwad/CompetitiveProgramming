@@ -2,7 +2,19 @@
 	Author: Nayeemul Islam Swad
 	
 	Idea: 
-		- 
+		- Represent the board as a bipartite graph whose left component
+		  has a node for every row and right one has a node for every
+		  column and there is edge between two nodes iff there is a
+		  diamond in the corresponding cell of the board.
+
+		- So, the problems simply asks us to figure out if an Euler path
+		  exists starting from the right component. This is a very
+		  well-known problem. An Euler path exists iff,
+		    * If the start and end points are same, then all the vertices
+		      in the graph must have an even degree.
+		    * If they are not same, then all the vertices in the graph
+		      except them must have an even degree. The start and end
+		      vertices must have odd degree.
 */
 
 #include <bits/stdc++.h>
