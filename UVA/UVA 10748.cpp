@@ -1,3 +1,10 @@
+/*
+	Author: Nayeemul Islam Swad
+	
+	Idea: 
+		- 
+*/
+
 #include <bits/stdc++.h>
 
 using namespace std;
